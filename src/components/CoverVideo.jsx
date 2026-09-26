@@ -8,6 +8,7 @@ const VideoContainer = styled.section`
   width: 100%;
   height: 100vh;
   position: relative;
+
   video {
     width: 100%;
     height: 100vh;
@@ -16,8 +17,18 @@ const VideoContainer = styled.section`
     @media (max-width: 48em) {
       object-position: center 10%;
     }
+
     @media (max-width: 30em) {
       object-position: center 50%;
+    }
+  }
+
+  /* MOBILE ONLY */
+  @media (max-width: 48em) {
+    height: 100svh;
+
+    video {
+      height: 100svh;
     }
   }
 `;
@@ -58,10 +69,11 @@ const Title = styled(motion.div)`
     text-shadow: 1px 1px 1px ${(props) => props.theme.body};
 
     @media (max-width: 30em) {
-      /* font-size: ${(props) => props.theme.fontxxxl}; */
-      font-size: calc(5rem + 8vw);
+      font-size: clamp(3.5rem, 16vw, 6rem);
+      line-height: 0.95;
     }
   }
+
   h2 {
     font-size: ${(props) => props.theme.fontlg};
     font-family: "Sirin Stencil";
@@ -73,8 +85,60 @@ const Title = styled(motion.div)`
 
     @media (max-width: 30em) {
       font-size: ${(props) => props.theme.fontmd};
-      /* font-size: calc(5rem + 8vw); */
       margin-top: -1.5rem;
+    }
+  }
+
+  /* MOBILE ONLY */
+  @media (max-width: 48em) {
+    padding: 0 1.2rem;
+    box-sizing: border-box;
+
+    > div {
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0 0.5rem;
+    }
+
+    h1 {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    h2 {
+      max-width: 90%;
+      text-align: center;
+      line-height: 1.2;
+    }
+  }
+
+  /* SMALL MOBILE ONLY */
+  @media (max-width: 30em) {
+    justify-content: center;
+
+    > div {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    h1 {
+      font-size: clamp(3.5rem, 17vw, 5.5rem);
+      line-height: 0.9;
+    }
+
+    h2 {
+      max-width: 95%;
+      font-size: 1rem;
+      line-height: 1.3;
+      margin-top: 1rem;
+    }
+
+    h2:last-child {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
   }
 `;
@@ -84,7 +148,7 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      delayChildren: 5, // 2
+      delayChildren: 5,
       staggerChildren: 0.3,
     },
   },
@@ -108,8 +172,9 @@ const CoverVideo = () => {
             data-scroll-delay="0.13"
             data-scroll-speed="4"
           >
-           Graphic 
+            Graphic
           </motion.h1>
+
           <motion.h1
             variants={item}
             data-scroll
@@ -118,8 +183,8 @@ const CoverVideo = () => {
           >
             Designer
           </motion.h1>
-         
         </div>
+
         <motion.h2
           style={{ alignSelf: "flex-end" }}
           variants={item}
@@ -127,17 +192,19 @@ const CoverVideo = () => {
           data-scroll-delay="0.04"
           data-scroll-speed="2"
         >
-           MONA ASWAL
+          MONA ASWAL
         </motion.h2>
-        <motion.h2 className="pt-10"
+
+        <motion.h2
+          className="pt-10"
           style={{ alignSelf: "flex-end" }}
           variants={item}
           data-scroll
           data-scroll-delay="0.04"
           data-scroll-speed="2"
         >
-          Skip traditional agencies.
-Premium beauty visuals delivered with precision.
+          Skip traditional agencies. Premium beauty visuals delivered with
+          precision.
         </motion.h2>
       </Title>
 

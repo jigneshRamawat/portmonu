@@ -18,24 +18,24 @@ import img12 from "../assets/Images/12.jpg";
 const Section = styled(motion.section)`
   min-height: 100vh;
   height: auto;
-  /* width: 80vw; */
   width: 100%;
   margin: 0 auto;
   overflow: hidden;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-
   position: relative;
 
-  /* background-color: orange; */
+  /* MOBILE + TABLET ONLY */
+  @media (max-width: 64em) {
+    display: block;
+    min-height: 100vh;
+  }
 `;
-
 const Title = styled.h1`
   font-size: ${(props) => props.theme.fontxxxl};
   font-family: "Kaushan Script";
   font-weight: 300;
-  /* text-transform: capitalize; */
   color: ${(props) => props.theme.text};
   text-shadow: 1px 1px 1px ${(props) => props.theme.body};
 
@@ -47,11 +47,31 @@ const Title = styled.h1`
   @media (max-width: 64em) {
     font-size: ${(props) => props.theme.fontxxl};
   }
+
   @media (max-width: 48em) {
     font-size: ${(props) => props.theme.fontxl};
   }
-`;
 
+  /* MOBILE/TABLET */
+  @media (max-width: 64em) {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 1rem 1.5rem 0;
+    margin: 0;
+
+    text-align: center;
+  }
+
+  @media (max-width: 30em) {
+    font-size: clamp(3rem, 14vw, 5rem);
+    padding-top: 1rem;
+  }
+`;
 const Left = styled.div`
   width: 35%;
   background-color: ${(props) => props.theme.body};
@@ -62,6 +82,7 @@ const Left = styled.div`
 
   position: fixed;
   left: 0;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -78,21 +99,64 @@ const Left = styled.div`
       font-size: ${(props) => props.theme.fontmd};
     }
   }
+    @media (max-width: 30em) {
+  p {
+    font-size: 1.15rem;
+    line-height: 1.7;
+  }
+}
+  
 
   @media (max-width: 48em) {
     width: 40%;
+
     p {
       font-size: ${(props) => props.theme.fontsm};
     }
   }
+
   @media (max-width: 30em) {
     p {
       font-size: ${(props) => props.theme.fontxs};
     }
   }
+
+  /* MOBILE/TABLET ONLY */
+  @media (max-width: 64em) {
+    position: relative;
+    left: auto;
+
+    width: 100%;
+    min-height: auto;
+
+    display: block;
+
+    padding: 1.5rem 2rem 2rem;
+    box-sizing: border-box;
+
+    background-color: ${(props) => props.theme.body};
+
+    p {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+
+      text-align: center;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+  }
+
+  @media (max-width: 30em) {
+    padding: 1rem 1.5rem 2rem;
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+  }
 `;
 const Right = styled.div`
-  /* width: 65%; */
   position: absolute;
   left: 35%;
   padding-left: 30%;
@@ -102,12 +166,47 @@ const Right = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
+
+  /* MOBILE/TABLET */
+  @media (max-width: 64em) {
+    position: relative;
+
+    left: auto;
+
+    width: max-content;
+    min-height: auto;
+
+    padding-left: 2rem;
+    padding-right: 2rem;
+
+    margin-top: 1rem;
+
+    display: flex;
+    align-items: center;
+
+    background-color: ${(props) => props.theme.grey};
+  }
+
+  @media (max-width: 48em) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 30em) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 `;
+
+
 
 const Item = styled(motion.div)`
   display: inline-block;
   width: 22rem;
   margin-right: 7rem;
+
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -125,11 +224,38 @@ const Item = styled(motion.div)`
 
   @media (max-width: 48em) {
     width: 15rem;
+    margin-right: 3rem;
 
     img {
       height: 20rem;
     }
   }
+
+  @media (max-width: 30em) {
+    width: 14rem;
+    margin-right: 1.5rem;
+
+    img {
+      height: 19rem;
+    }
+
+    h1 {
+      font-size: 1rem;
+      margin-top: 0.8rem;
+    }
+  }
+
+  @media (max-width: 64em) {
+  img:first-child {
+    filter: grayscale(100%);
+
+    border: 3px solid #000 !important;
+    outline: 3px solid #fff;
+    outline-offset: -8px;
+
+    transition: filter 0.4s ease;
+  }
+}
 `;
 //data-scroll data-scroll-speed="-2" data-scroll-direction="horizontal"
 const Product = ({ img, title = "" }) => {
@@ -153,52 +279,65 @@ const Shop = () => {
 
   const Horizontalref = useRef(null);
 
-  useLayoutEffect(() => {
-    let element = ref.current;
+useLayoutEffect(() => {
+  const element = ref.current;
+  const scrollingElement = Horizontalref.current;
 
-    let scrollingElement = Horizontalref.current;
+  if (!element || !scrollingElement) return;
 
-    let pinWrapWidth = scrollingElement.offsetWidth;
-    let t1 = gsap.timeline();
+  const isMobile = window.innerWidth <= 1024;
 
-    setTimeout(() => {
-      t1.to(element, {
-        scrollTrigger: {
-          trigger: element,
-          start: "top top",
-          end: `${pinWrapWidth} bottom`,
-          scroller: ".App", //locomotive-scroll
-          scrub: 1,
-          pin: true,
-          // markers: true,
-          // anticipatePin: 1,
-        },
-        height: `${scrollingElement.scrollWidth}px`,
-        ease: "none",
-      });
+  let pinWrapWidth = scrollingElement.offsetWidth;
 
-      t1.to(scrollingElement, {
-        scrollTrigger: {
-          trigger: scrollingElement,
-          start: "top top",
-          end: `${pinWrapWidth} bottom`,
-          scroller: ".App", //locomotive-scroll
-          scrub: 1,
-          // markers: true,
-        },
-        x: -pinWrapWidth,
+  const t1 = gsap.timeline();
 
-        ease: "none",
-      });
-      ScrollTrigger.refresh();
-    }, 1000);
+  setTimeout(() => {
+    pinWrapWidth = scrollingElement.scrollWidth;
+
+    t1.to(element, {
+      scrollTrigger: {
+        trigger: element,
+        start: "top top",
+        end: () => `${scrollingElement.scrollWidth} bottom`,
+        scroller: ".App",
+        scrub: 1,
+        pin: true,
+      },
+
+      height: isMobile
+        ? `${scrollingElement.scrollWidth}px`
+        : `${scrollingElement.scrollWidth}px`,
+
+      ease: "none",
+    });
+
+    t1.to(scrollingElement, {
+      scrollTrigger: {
+        trigger: scrollingElement,
+        start: "top top",
+        end: () => `${scrollingElement.scrollWidth} bottom`,
+        scroller: ".App",
+        scrub: 1,
+      },
+
+      x: () => -(
+        scrollingElement.scrollWidth - window.innerWidth
+      ),
+
+      ease: "none",
+    });
+
     ScrollTrigger.refresh();
+  }, 500);
 
-    return () => {
-      t1.kill();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, []);
+  return () => {
+    t1.kill();
+
+    ScrollTrigger.getAll().forEach((trigger) => {
+      trigger.kill();
+    });
+  };
+}, []);
 
   return (
     <Section ref={ref} id="shop">
