@@ -200,7 +200,7 @@ const CoverVideo = () => {
   return (
     <VideoContainer id="home">
       <Header>
-        <div className="name">▪️</div>
+        <div className="name"></div>
 
       </Header>
 
