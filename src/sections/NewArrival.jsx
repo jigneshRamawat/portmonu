@@ -12,7 +12,6 @@ import img5 from "../assets/Images/05.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Theme colors from the reference image
 const C = {
   pink: "#FF4FA8",
   cream: "#FFF0DF",
@@ -32,6 +31,16 @@ const Section = styled.section`
   position: relative;
   background-color: ${C.burgundy};
   color: ${C.cream};
+
+  /* Mobile and tablet only */
+  @media (max-width: 64em) {
+    display: block;
+    min-height: 100vh;
+    height: auto !important;
+    padding: 1rem 0 2rem;
+    overflow: visible;
+    box-sizing: border-box;
+  }
 `;
 
 const Overlay = styled.div`
@@ -68,6 +77,11 @@ const Overlay = styled.div`
     width: 80vw;
     height: 60vh;
   }
+
+  /* Prevent overlay from covering mobile content */
+  @media (max-width: 64em) {
+    display: none;
+  }
 `;
 
 const Container = styled.div`
@@ -95,6 +109,31 @@ const Container = styled.div`
   @media (max-width: 30em) {
     width: 60vw;
   }
+
+  /* Mobile and tablet layout */
+  @media (max-width: 64em) {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+
+    width: 100%;
+    height: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 2rem;
+    padding: 1rem 1rem 2rem;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 30em) {
+    gap: 1.5rem;
+    padding: 0.75rem 1rem 1.5rem;
+  }
 `;
 
 const Title = styled(motion.h1)`
@@ -116,6 +155,28 @@ const Title = styled(motion.h1)`
 
   @media (max-width: 48em) {
     font-size: ${(props) => props.theme.fontxl};
+  }
+
+  /* Mobile and tablet title */
+  @media (max-width: 64em) {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    display: block;
+    width: 100%;
+
+    margin: 0;
+    padding: 1rem 0.75rem 1.5rem;
+
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  @media (max-width: 30em) {
+    font-size: clamp(2.5rem, 12vw, 3.5rem);
+    padding: 0.75rem 0.5rem 1.25rem;
   }
 `;
 
@@ -142,8 +203,12 @@ const Item = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border:solid 10px ${C.pink};
+
+  border: solid 10px ${C.pink};
   margin: 5rem 0;
+
+  box-sizing: border-box;
+  overflow: hidden;
 
   h2 {
     color: ${C.cream};
@@ -151,19 +216,62 @@ const Item = styled.div`
     text-align: center;
     line-height: 1.5;
     padding: 0.5rem;
+    margin: 0;
   }
 
   img {
     width: 100%;
     height: auto;
     z-index: 5;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* Mobile and tablet */
+  @media (max-width: 64em) {
+    width: 100%;
+    max-width: 30rem;
+    margin: 0;
+
+    border-width: 7px;
+
+    img {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+    }
+
+    h2 {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.75rem 0.5rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 30em) {
+    max-width: 100%;
+    border-width: 5px;
+
+    h2 {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      padding: 0.65rem 0.4rem;
+    }
   }
 `;
 
 const Photos = ({ img, name }) => {
   return (
-    <Item >
-      <img  width="400" height="600" src={img} alt={name} />
+    <Item>
+      <img
+        width="400"
+        height="600"
+        src={img}
+        alt={name}
+        loading="lazy"
+      />
       <h2>{name}</h2>
     </Item>
   );
@@ -179,52 +287,62 @@ const NewArrival = () => {
 
     if (!element || !scrollingElement) return;
 
-    const t1 = gsap.timeline();
+    const mm = gsap.matchMedia();
 
-    const timeout = setTimeout(() => {
-      const mainHeight = scrollingElement.scrollHeight;
+    // Desktop animation only.
+    // Mobile and tablet use normal page scrolling.
+    mm.add("(min-width: 64.01em)", () => {
+      const t1 = gsap.timeline();
 
-      element.style.height = `calc(${mainHeight / 4}px)`;
+      const timeout = setTimeout(() => {
+        if (!element || !scrollingElement) return;
 
-      t1.to(element, {
-        scrollTrigger: {
-          trigger: element,
-          start: "top top",
-          end: "bottom+=100% top-=100%",
-          scroller: ".App",
-          scrub: 1,
-          pin: true,
-        },
-        ease: "none",
-      });
+        const mainHeight = scrollingElement.scrollHeight;
 
-      t1.fromTo(
-        scrollingElement,
-        {
-          y: "0",
-        },
-        {
-          y: "-100%",
+        element.style.height = `calc(${mainHeight / 4}px)`;
+
+        t1.to(element, {
           scrollTrigger: {
-            trigger: scrollingElement,
+            trigger: element,
             start: "top top",
-            end: "bottom top",
+            end: "bottom+=100% top-=100%",
             scroller: ".App",
             scrub: 1,
+            pin: true,
           },
-        }
-      );
+          ease: "none",
+        });
+
+        t1.fromTo(
+          scrollingElement,
+          {
+            y: "0",
+          },
+          {
+            y: "-100%",
+            scrollTrigger: {
+              trigger: scrollingElement,
+              start: "top top",
+              end: "bottom top",
+              scroller: ".App",
+              scrub: 1,
+            },
+          }
+        );
+
+        ScrollTrigger.refresh();
+      }, 1000);
 
       ScrollTrigger.refresh();
-    }, 1000);
 
-    ScrollTrigger.refresh();
+      return () => {
+        clearTimeout(timeout);
+        t1.kill();
+      };
+    });
 
     return () => {
-      clearTimeout(timeout);
-      t1.kill();
-
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      mm.revert();
     };
   }, []);
 
@@ -236,7 +354,8 @@ const NewArrival = () => {
         data-scroll
         data-scroll-speed="-2"
         data-scroll-direction="horizontal"
-      >  Work <br /> Experience
+      >
+        Work <br /> Experience
       </Title>
 
       <Container ref={ScrollingRef}>
