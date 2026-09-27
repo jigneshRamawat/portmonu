@@ -22,9 +22,10 @@ html.has-scroll-smooth {
     margin: 0;
     padding: 0;
 }
-body{
-    font-family: "Sirin Stencil";
-    overflow-x: hidden;
+body {
+  font-family: "Sirin Stencil";
+  overflow-x: hidden;
+  background-color: #500018;
 }
 h1,h2,h3,h4,h5,h6{
     margin: 0;

@@ -1,3 +1,5 @@
+import { correctBorderRadius } from "framer-motion";
+
 export const light = {
   body: '#fff',
   text: '#202020', // black shade

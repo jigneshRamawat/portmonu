@@ -9,8 +9,7 @@ const Section = styled.section`
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* background-color: blue; */
+  
   position: relative;
 
 @media (max-width: 48em){
@@ -21,7 +20,7 @@ const Section = styled.section`
 
 const Container = styled.div`
   min-height: 100vh;
-
+ background:white;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -35,8 +34,7 @@ const Container = styled.div`
 const Banner = styled.h1`
   font-size: ${(props) => props.theme.fontxxxl};
   font-family: 'Kaushan Script';
-  color: ${(props) => props.theme.text};
-  /* position: absolute; */
+  color:#FF4FA8 ;
   white-space: nowrap;
   text-transform: uppercase;
   line-height: 1;

@@ -12,7 +12,9 @@ const Section = styled.section`
   position: relative;
   display: flex;
 
-  /* TABLET */
+  background-color: #500018;
+  color: #fff0df;
+
   @media (max-width: 64em) {
     width: 90vw;
     min-height: auto;
@@ -20,20 +22,19 @@ const Section = styled.section`
     padding: 5rem 0 6rem;
   }
 
-  /* MOBILE */
   @media (max-width: 30em) {
     width: 92vw;
     padding: 4rem 0 5rem;
   }
 `;
-
 const Left = styled.div`
   width: 50%;
   font-size: ${(props) => props.theme.fontlg};
   font-weight: 300;
   position: relative;
   z-index: 5;
-  margin-top: 20%;
+  margin-top: 15%;
+  color: #fff0df;
 
   /* KEEP DESKTOP/THE ORIGINAL TABLET DESIGN */
   @media (max-width: 64em) {
@@ -94,6 +95,7 @@ const Left = styled.div`
 const Right = styled.div`
   width: 50%;
   position: relative;
+  background-color: #500018;
 
   img {
     width: 100%;
@@ -212,12 +214,11 @@ const Right = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: ${(props) => props.theme.fontBig};
+  font-size:9rem;
   font-family: "Kaushan Script";
-  font-weight: 300;
-
+  font-weight: 900;
+  color: #ff4fa8;
   position: absolute;
-  top: 1rem;
   left: 5%;
   z-index: 5;
 
@@ -277,18 +278,14 @@ const About = () => {
         Graphic Designer with 8 years of experience specializing in FMCG and
         beauty brand visuals. I bridge the gap between strategic brand
         positioning and premium packaging design.
-
         <br />
         <br />
-
         My expertise spans haircare, makeup, and skincare — from retail shelves
         to professional salon-exclusive lines. I design with a deep
         understanding of skin science aesthetics, material textures, and the
         subtle psychology of beige & brown luxury.
-
         <br />
         <br />
-
         Haircare, Makeup, Skincare Retail,
         <br />
         Professional Salon, Skin Science
@@ -301,7 +298,7 @@ const About = () => {
           src={img1}
           alt="About Us"
           style={{
-            border: "2px solid black",
+            border: "10px solid #ebb0f8",
             borderTopLeftRadius: "70%",
             borderTopRightRadius: "30%",
           }}

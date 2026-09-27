@@ -17,7 +17,7 @@ const Section = styled.section`
   overflow-x: hidden;
 
 
-  background-color: ${(props) => props.theme.body};
+  background-color:#DF91FF;
   color: ${(props) => props.theme.text};
 
   position: relative;

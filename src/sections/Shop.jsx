@@ -25,6 +25,7 @@ const Section = styled(motion.section)`
   justify-content: flex-start;
   align-items: flex-start;
   position: relative;
+  background-color: #ff4fa8;
 
   /* MOBILE + TABLET ONLY */
   @media (max-width: 64em) {
@@ -35,8 +36,10 @@ const Section = styled(motion.section)`
 const Title = styled.h1`
   font-size: ${(props) => props.theme.fontxxxl};
   font-family: "Kaushan Script";
-  font-weight: 300;
-  color: ${(props) => props.theme.text};
+  font-weight: 900;
+  color: #500118;
+ 
+
   text-shadow: 1px 1px 1px ${(props) => props.theme.body};
 
   position: absolute;
@@ -74,8 +77,8 @@ const Title = styled.h1`
 `;
 const Left = styled.div`
   width: 35%;
-  background-color: ${(props) => props.theme.body};
-  color: ${(props) => props.theme.text};
+  background-color: #ff4fa8;
+color: #500018;
 
   min-height: 100vh;
   z-index: 10;
@@ -160,8 +163,8 @@ const Right = styled.div`
   position: absolute;
   left: 35%;
   padding-left: 30%;
-  background-color: ${(props) => props.theme.grey};
   min-height: 100vh;
+  background-color: #ff4fa8;
 
   display: flex;
   justify-content: flex-start;
@@ -205,8 +208,11 @@ const Item = styled(motion.div)`
   display: inline-block;
   width: 22rem;
   margin-right: 7rem;
-
   flex-shrink: 0;
+
+  background-color: #fff0df;
+  color: #500018;
+  padding-bottom: 1.5rem;
 
   img {
     width: 100%;
@@ -220,6 +226,17 @@ const Item = styled(motion.div)`
     font-weight: 500;
     text-align: center;
     cursor: pointer;
+    color: #500018;
+    padding-top: 1rem;
+  }
+
+  &:nth-child(even) {
+    background-color: #500018;
+    color: #fff0df;
+
+    h1 {
+      color: #fff0df;
+    }
   }
 
   @media (max-width: 48em) {
@@ -246,16 +263,14 @@ const Item = styled(motion.div)`
   }
 
   @media (max-width: 64em) {
-  img:first-child {
-    filter: grayscale(100%);
-
-    border: 3px solid #000 !important;
-    outline: 3px solid #fff;
-    outline-offset: -8px;
-
-    transition: filter 0.4s ease;
+    img:first-child {
+      filter: grayscale(100%);
+      border: 3px solid #f0440b !important;
+      outline: 3px solid #fff0df;
+      outline-offset: -8px;
+      transition: filter 0.4s ease;
+    }
   }
-}
 `;
 //data-scroll data-scroll-speed="-2" data-scroll-direction="horizontal"
 const Product = ({ img, title = "" }) => {
@@ -267,8 +282,9 @@ const Product = ({ img, title = "" }) => {
       transition={{ duration: 0.5 }}
       viewport={{ once: false, amount: "all" }}
     >
-      <img width="400" height="600" src={img} alt={title} />
-      <h1>{title}</h1>
+
+      <img width="400" style={{border:"solid 1px white" }} height="600" src={img} alt={title} />
+      <h1 >{title}</h1>
     </Item>
   );
 };
