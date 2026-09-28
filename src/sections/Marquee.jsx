@@ -20,15 +20,23 @@ const Section = styled.section`
 
 const Container = styled.div`
   min-height: 100vh;
- background:white;
+  background: white;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
 
-  @media (max-width: 64em){
+  @media (max-width: 64em) {
     justify-content: center;
-}
+  }
+
+  /* Mobile only */
+  @media (max-width: 48em) {
+    min-height: 65vh;
+    padding: 0.5rem 0;
+    justify-content: center;
+    gap: 0.3rem;
+  }
 `;
 
 const Banner = styled.h1`
@@ -41,18 +49,23 @@ const Banner = styled.h1`
 
   @media (max-width: 70em){
     font-size: ${(props) => props.theme.fontxxl};
+   
+
 }
 @media (max-width: 64em){
     margin: 1rem 0;
+    
 }
  
 @media (max-width: 48em){
     font-size: ${(props) => props.theme.fontxl};
     margin: 0.5rem 0;
+    
 
 }
 @media (max-width: 30em){
     font-size: ${(props) => props.theme.fontlg};
+    
 }
 
   span {
