@@ -183,7 +183,7 @@ const Footer = () => {
           >
             Made with &hearts; {" "}
             <a
-              href="http://devdreaming.com"
+              href="mailto:monaaswal29@gmail.com"
               target={"_blank"}
               rel="dofollow noreferrer"
             >
