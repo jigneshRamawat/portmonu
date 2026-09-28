@@ -158,9 +158,9 @@ const Subtitle = styled(motion.p)`
   max-width: 750px;
   margin-top: 2rem;
   color: #fff0df;
-  font-family: Arial, sans-serif;
-  font-size: clamp(0.9rem, 1.5vw, 1.3rem);
-  line-height: 1.6;
+  font-family: "Sirin Stencil", sans-serif;
+  font-size: clamp(0.9rem, 1.8vw, 1.3rem);
+  line-height: 1.9;
   text-align: center;
   animation: ${fadeIn} 1.5s ease both;
 
