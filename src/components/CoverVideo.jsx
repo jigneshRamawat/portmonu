@@ -179,7 +179,7 @@ const Footer = styled.div`
   align-items: flex-end;
   width: 100%;
   color: #fff0df;
-  font-family: Arial, sans-serif;
+  font-family: "Sirin Stencil", sans-serif;
   font-size: clamp(0.8rem, 1.3vw, 1.1rem);
   line-height: 1.4;
 
