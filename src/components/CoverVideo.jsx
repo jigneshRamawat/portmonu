@@ -234,6 +234,7 @@ const CoverVideo = () => {
           <Letter>A</Letter>
           <Letter>S</Letter>
           <Letter>W</Letter>
+          <Letter>A</Letter>
           <Letter>L</Letter>
         </Title>
 
@@ -254,7 +255,7 @@ const CoverVideo = () => {
           mona.aswal@gmail.com
         </div>
 
-        <div className="date">Grafic Designer</div>
+        <div className="date">Graphic Designer</div>
       </Footer>
     </VideoContainer>
   );

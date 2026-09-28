@@ -95,7 +95,7 @@ const Logo = () => {
         </svg>
 
         <Text variants={textVariants} initial="hidden" animate="visible">
-          MONA ASWAL
+          
         </Text>
       </Link>
     </Container>
