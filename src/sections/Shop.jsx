@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
-import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useLayoutEffect, useRef } from "react";
 import styled from "styled-components";
 
 import img3 from "../assets/Images/3.webp";
@@ -12,6 +14,8 @@ import img9 from "../assets/Images/9.jpg";
 import img10 from "../assets/Images/10.jpg";
 import img11 from "../assets/Images/11.jpg";
 import img12 from "../assets/Images/12.jpg";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* =========================================================
    SECTION
@@ -98,6 +102,7 @@ const Title = styled.h1`
 
   @media (max-width: 30em) {
     font-size: clamp(3rem, 14vw, 5rem);
+
     padding-top: 1rem;
   }
 `;
@@ -113,15 +118,18 @@ const Left = styled.div`
   flex: 0 0 35%;
 
   position: relative;
+
   z-index: 5;
 
   display: flex;
+
   justify-content: center;
   align-items: center;
 
   box-sizing: border-box;
 
   background-color: #ff4fa8;
+
   color: #500118;
 
   p {
@@ -186,7 +194,7 @@ const Left = styled.div`
 `;
 
 /* =========================================================
-   RIGHT HORIZONTAL CONTAINER
+   RIGHT VIEWPORT
 ========================================================= */
 
 const Right = styled.div`
@@ -200,6 +208,7 @@ const Right = styled.div`
   position: relative;
 
   display: flex;
+
   align-items: center;
 
   padding: 2rem 0;
@@ -208,33 +217,7 @@ const Right = styled.div`
 
   background-color: #ff4fa8;
 
-  /*
-    IMPORTANT
-    Horizontal scrolling container.
-  */
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  -webkit-overflow-scrolling: touch;
-
-  overscroll-behavior-x: contain;
-
-  scrollbar-width: thin;
-
-  scrollbar-color: #500118 #ff4fa8;
-
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #ff4fa8;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #500118;
-    border-radius: 20px;
-  }
+  overflow: hidden;
 
   @media (max-width: 64em) {
     width: 100%;
@@ -250,11 +233,16 @@ const Right = styled.div`
     padding: 1rem 2rem 2rem;
 
     overflow-x: auto;
+
     overflow-y: hidden;
 
     -webkit-overflow-scrolling: touch;
 
     overscroll-behavior-x: contain;
+
+    scrollbar-width: thin;
+
+    scrollbar-color: #500118 #ff4fa8;
   }
 
   @media (max-width: 48em) {
@@ -280,13 +268,19 @@ const Track = styled.div`
   min-width: max-content;
 
   padding-left: 3rem;
+
   padding-right: 5rem;
 
   box-sizing: border-box;
 
+  will-change: transform;
+
   @media (max-width: 64em) {
     padding-left: 0;
+
     padding-right: 1rem;
+
+    transform: none !important;
   }
 `;
 
@@ -424,11 +418,11 @@ const Product = ({ img, title = "" }) => {
       }}
     >
       <img
-        width="400"
-        height="600"
         src={img}
         alt={title}
-        loading="lazy"
+        width="400"
+        height="600"
+        loading="eager"
       />
 
       <h1>{title}</h1>
@@ -443,224 +437,259 @@ const Product = ({ img, title = "" }) => {
 const Shop = () => {
   const sectionRef = useRef(null);
   const rightRef = useRef(null);
+  const trackRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const section = sectionRef.current;
     const right = rightRef.current;
+    const track = trackRef.current;
 
-    if (!section || !right) {
+    if (!section || !right || !track) {
       return;
     }
 
+    const mm = gsap.matchMedia();
+
     /* =====================================================
-       WHEEL HANDLER
-
-       Desktop:
-       vertical mouse wheel -> horizontal product scroll
-
-       Mobile:
-       normal native swipe
+       DESKTOP GSAP HORIZONTAL SCROLL
     ===================================================== */
 
-    const handleWheel = (event) => {
-      if (window.innerWidth <= 1024) {
-        return;
-      }
+    mm.add("(min-width: 1025px)", () => {
+      let scrollTween = null;
 
       /*
-        Make sure Shop is actually visible.
+        Calculate exact horizontal distance.
       */
 
-      const rect = section.getBoundingClientRect();
+      const getDistance = () => {
+        if (!right || !track) {
+          return 0;
+        }
 
-      const visible =
-        rect.bottom > 0 &&
-        rect.top < window.innerHeight;
-
-      if (!visible) {
-        return;
-      }
+        return Math.max(
+          0,
+          track.scrollWidth - right.clientWidth
+        );
+      };
 
       /*
-        Calculate available horizontal scroll.
+        Wait for all images.
+        This prevents the width from changing while
+        ScrollTrigger is already running.
       */
 
-      const maxScroll = Math.max(
-        0,
-        right.scrollWidth - right.clientWidth
+      const images = Array.from(
+        track.querySelectorAll("img")
       );
 
-      if (maxScroll <= 0) {
-        return;
-      }
+      const waitForImages = () => {
+        const promises = images.map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) => {
+            const done = () => {
+              image.removeEventListener(
+                "load",
+                done
+              );
+
+              image.removeEventListener(
+                "error",
+                done
+              );
+
+              resolve();
+            };
+
+            image.addEventListener(
+              "load",
+              done
+            );
+
+            image.addEventListener(
+              "error",
+              done
+            );
+          });
+        });
+
+        return Promise.all(promises);
+      };
 
       /*
-        Mouse wheel normally uses deltaY.
-
-        Trackpad may provide deltaX.
+        Create animation only once.
       */
 
-      let delta = event.deltaY;
+      const createScroll = () => {
+        const distance = getDistance();
 
-      if (
-        Math.abs(event.deltaX) >
-        Math.abs(event.deltaY)
-      ) {
-        delta = event.deltaX;
-      }
-
-      if (delta === 0) {
-        return;
-      }
-
-      const currentScroll = right.scrollLeft;
-
-      const nextScroll = Math.max(
-        0,
-        Math.min(
-          maxScroll,
-          currentScroll + delta
-        )
-      );
-
-      /*
-        ===================================================
-        SCROLL RIGHT
-        ===================================================
-      */
-
-      if (
-        delta > 0 &&
-        currentScroll < maxScroll
-      ) {
-        /*
-          STOP VERTICAL PAGE SCROLL
-        */
-
-        event.preventDefault();
-        event.stopPropagation();
+        if (distance <= 0) {
+          return;
+        }
 
         /*
-          MOVE PRODUCTS HORIZONTALLY
+          Reset track only once before creating tween.
         */
 
-        right.scrollLeft = nextScroll;
-
-        return;
-      }
-
-      /*
-        ===================================================
-        SCROLL LEFT
-        ===================================================
-      */
-
-      if (
-        delta < 0 &&
-        currentScroll > 0
-      ) {
-        /*
-          STOP VERTICAL PAGE SCROLL
-        */
-
-        event.preventDefault();
-        event.stopPropagation();
+        gsap.set(track, {
+          x: 0,
+        });
 
         /*
-          MOVE PRODUCTS BACK
+          GSAP horizontal animation.
         */
 
-        right.scrollLeft = nextScroll;
+        scrollTween = gsap.to(track, {
+          x: () => -getDistance(),
 
-        return;
-      }
+          ease: "none",
+
+          scrollTrigger: {
+            trigger: section,
+
+            start: "top top",
+
+            /*
+              The vertical scroll duration is exactly
+              the horizontal distance.
+            */
+
+            end: () => `+=${getDistance()}`,
+
+            /*
+              Your project is using .App as the scroll
+              container.
+            */
+
+            scroller: ".App",
+
+            /*
+              Smooth interpolation.
+              Increase to 1.5 for slower/smoother movement.
+            */
+
+            scrub: 1.2,
+
+            /*
+              Keep Shop on screen while horizontal
+              animation is running.
+            */
+
+            pin: true,
+
+            pinSpacing: true,
+
+            anticipatePin: 1,
+
+            invalidateOnRefresh: true,
+
+            fastScrollEnd: true,
+
+            preventOverlaps: true,
+          },
+        });
+
+        ScrollTrigger.refresh();
+      };
+
+      let cancelled = false;
 
       /*
-        ===================================================
-        IMPORTANT
-
-        When:
-        - last image reached + wheel DOWN
-        OR
-        - first image reached + wheel UP
-
-        We intentionally DON'T preventDefault.
-
-        So the normal page scrolling can continue.
-        ===================================================
+        Wait until images are ready.
       */
-    };
 
-    /*
-      Capture phase is important because your project
-      uses smooth/Locomotive-style scrolling.
-    */
+      waitForImages().then(() => {
+        if (cancelled) {
+          return;
+        }
 
-    section.addEventListener(
-      "wheel",
-      handleWheel,
-      {
-        passive: false,
-        capture: true,
-      }
-    );
+        /*
+          One frame after images/layout are ready.
+        */
 
-    /*
-      Keep horizontal position valid after resize.
-    */
+        requestAnimationFrame(() => {
+          if (cancelled) {
+            return;
+          }
 
-    const handleResize = () => {
-      const maxScroll = Math.max(
-        0,
-        right.scrollWidth - right.clientWidth
-      );
+          createScroll();
+        });
+      });
 
-      if (right.scrollLeft > maxScroll) {
-        right.scrollLeft = maxScroll;
-      }
-    };
+      /*
+        Resize should refresh the existing ScrollTrigger,
+        NOT recreate the animation.
+      */
 
-    window.addEventListener(
-      "resize",
-      handleResize
-    );
+      let resizeTimer = null;
 
-    /*
-      Recalculate when images finish loading.
-    */
+      const handleResize = () => {
+        clearTimeout(resizeTimer);
 
-    const images =
-      right.querySelectorAll("img");
+        resizeTimer = setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 150);
+      };
 
-    const handleImageLoad = () => {
-      handleResize();
-    };
-
-    images.forEach((image) => {
-      image.addEventListener(
-        "load",
-        handleImageLoad
-      );
-    });
-
-    return () => {
-      section.removeEventListener(
-        "wheel",
-        handleWheel,
-        true
-      );
-
-      window.removeEventListener(
+      window.addEventListener(
         "resize",
         handleResize
       );
 
-      images.forEach((image) => {
-        image.removeEventListener(
-          "load",
-          handleImageLoad
+      /*
+        Cleanup.
+      */
+
+      return () => {
+        cancelled = true;
+
+        clearTimeout(resizeTimer);
+
+        window.removeEventListener(
+          "resize",
+          handleResize
         );
+
+        if (scrollTween) {
+          scrollTween.scrollTrigger?.kill();
+
+          scrollTween.kill();
+
+          scrollTween = null;
+        }
+
+        gsap.set(track, {
+          clearProps: "transform",
+        });
+      };
+    });
+
+    /* =====================================================
+       MOBILE / TABLET
+    ===================================================== */
+
+    mm.add("(max-width: 1024px)", () => {
+      /*
+        No GSAP horizontal animation on mobile/tablet.
+
+        Native touch scrolling.
+      */
+
+      gsap.set(track, {
+        clearProps: "transform",
       });
+
+      return () => {
+        gsap.set(track, {
+          clearProps: "transform",
+        });
+      };
+    });
+
+    return () => {
+      mm.revert();
     };
   }, []);
 
@@ -704,11 +733,11 @@ const Shop = () => {
       </Left>
 
       {/* =================================================
-          RIGHT / HORIZONTAL PRODUCTS
+          RIGHT / PRODUCTS
       ================================================= */}
 
       <Right ref={rightRef}>
-        <Track>
+        <Track ref={trackRef}>
           <Product
             img={img3}
             title="KinetQ"
