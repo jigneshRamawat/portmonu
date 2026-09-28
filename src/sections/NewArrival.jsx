@@ -29,21 +29,19 @@ const C = {
 
 const Section = styled.section`
   width: 100%;
-
   min-height: 100vh;
+  height: 100vh;
 
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
 
   position: relative;
 
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
   background-color: ${C.burgundy};
-
   color: ${C.cream};
 
   box-sizing: border-box;
@@ -53,8 +51,9 @@ const Section = styled.section`
   @media (max-width: 64em) {
     display: block;
 
-    min-height: 100vh;
+    width: 100%;
 
+    min-height: 100vh;
     height: auto !important;
 
     padding: 1rem 0 2rem;
@@ -74,18 +73,15 @@ const Container = styled.div`
 
   position: absolute;
 
-  top: 25%;
-
+  top: 1%;
   left: 50%;
 
   transform: translateX(-50%);
 
   display: flex;
-
   flex-direction: column;
 
-  justify-content: center;
-
+  justify-content: flex-start;
   align-items: center;
 
   box-sizing: border-box;
@@ -100,21 +96,17 @@ const Container = styled.div`
     position: relative;
 
     top: auto;
-
     left: auto;
 
     transform: none;
 
     width: 100%;
-
     height: auto;
 
     display: flex;
-
     flex-direction: column;
 
     align-items: center;
-
     justify-content: flex-start;
 
     gap: 2rem;
@@ -122,6 +114,8 @@ const Container = styled.div`
     padding: 1rem 1rem 2rem;
 
     box-sizing: border-box;
+
+    will-change: auto;
   }
 
   @media (max-width: 30em) {
@@ -149,7 +143,6 @@ const Title = styled(motion.h1)`
   position: absolute;
 
   top: 2rem;
-
   left: 1rem;
 
   z-index: 15;
@@ -157,6 +150,8 @@ const Title = styled(motion.h1)`
   margin: 0;
 
   line-height: 1.1;
+
+  pointer-events: none;
 
   @media (max-width: 64em) {
     font-size: ${(props) => props.theme.fontxxl};
@@ -170,7 +165,6 @@ const Title = styled(motion.h1)`
     position: relative;
 
     top: auto;
-
     left: auto;
 
     display: block;
@@ -213,7 +207,6 @@ const Text = styled.div`
   padding: 2rem;
 
   top: 0;
-
   right: 0;
 
   z-index: 11;
@@ -235,11 +228,9 @@ const Item = styled.div`
   width: 100%;
 
   display: flex;
-
   flex-direction: column;
 
   justify-content: center;
-
   align-items: center;
 
   border: solid 10px ${C.pink};
@@ -248,7 +239,7 @@ const Item = styled.div`
 
   box-sizing: border-box;
 
-  overflow: visible;
+  overflow: hidden;
 
   background-color: ${C.burgundy};
 
@@ -272,7 +263,6 @@ const Item = styled.div`
 
   img {
     width: 100%;
-
     height: auto;
 
     display: block;
@@ -297,7 +287,6 @@ const Item = styled.div`
 
     img {
       width: 100%;
-
       height: auto;
 
       max-height: none;
@@ -308,11 +297,11 @@ const Item = styled.div`
     h2 {
       width: 100%;
 
-      box-sizing: border-box;
-
       padding: 0.75rem 0.5rem;
 
       font-size: 1.1rem;
+
+      box-sizing: border-box;
     }
   }
 
@@ -357,12 +346,10 @@ const Photos = ({ img, name }) => {
 
 const NewArrival = () => {
   const ref = useRef(null);
-
   const scrollingRef = useRef(null);
 
   useLayoutEffect(() => {
     const section = ref.current;
-
     const scrollingElement = scrollingRef.current;
 
     if (!section || !scrollingElement) {
@@ -376,17 +363,44 @@ const NewArrival = () => {
     ===================================================== */
 
     mm.add("(min-width: 64.01em)", () => {
-      let animation;
-      let trigger;
+      let animation = null;
 
-      const setupAnimation = () => {
+      const createAnimation = () => {
         if (!section || !scrollingElement) {
           return;
         }
 
-        /* -----------------------------------------------
-           Get complete content height.
-        ------------------------------------------------ */
+        /* -------------------------------------------------
+           IMPORTANT:
+           DO NOT manually increase section height here.
+
+           Section stays 100vh.
+           ScrollTrigger pin creates only the required
+           scrolling duration.
+        ------------------------------------------------- */
+
+        section.style.height = "100vh";
+
+        /*
+          Reset previous animation.
+        */
+
+        if (animation) {
+          animation.kill();
+          animation = null;
+        }
+
+        /*
+          Reset image column.
+        */
+
+        gsap.set(scrollingElement, {
+          y: 0,
+        });
+
+        /*
+          Get actual full content height.
+        */
 
         const contentHeight =
           scrollingElement.scrollHeight;
@@ -395,53 +409,31 @@ const NewArrival = () => {
           window.innerHeight;
 
         /*
-          Total distance needed to move the entire
-          image column upward.
+          Move enough so the complete last item becomes
+          visible near the bottom of the viewport.
+
+          0.90 means the last item can finish around
+          90% of the viewport rather than leaving huge
+          unused space.
         */
 
         const moveDistance = Math.max(
           0,
-          contentHeight - viewportHeight * 0.55
+          contentHeight - viewportHeight * 0.90
         );
 
         /*
-          Give the section enough scroll room.
-
-          No /4 calculation.
-          No clipping.
+          If there is nothing to scroll, don't create
+          a ScrollTrigger.
         */
 
-        const sectionHeight =
-          Math.max(
-            viewportHeight,
-            moveDistance + viewportHeight * 0.5
-          );
-
-        section.style.height = `${sectionHeight}px`;
-
-        /* -----------------------------------------------
-           Kill previous animation.
-        ------------------------------------------------ */
-
-        if (animation) {
-          animation.kill();
-        }
-
-        if (trigger) {
-          trigger.kill();
+        if (moveDistance <= 0) {
+          return;
         }
 
         /*
-          Reset position.
+          Create the vertical image movement.
         */
-
-        gsap.set(scrollingElement, {
-          y: 0,
-        });
-
-        /* -----------------------------------------------
-           Create scroll animation.
-        ------------------------------------------------ */
 
         animation = gsap.to(
           scrollingElement,
@@ -455,7 +447,18 @@ const NewArrival = () => {
 
               start: "top top",
 
-              end: `+=${moveDistance}`,
+              /*
+                Scroll distance is exactly equal to the
+                image movement.
+
+                This prevents unnecessary extra space.
+              */
+
+              end: () => `+=${moveDistance}`,
+
+              /*
+                Your project uses the .App scroller.
+              */
 
               scroller: ".App",
 
@@ -463,29 +466,28 @@ const NewArrival = () => {
 
               pin: true,
 
+              pinSpacing: true,
+
               anticipatePin: 1,
 
               invalidateOnRefresh: true,
 
+              /*
+                Make sure the animation finishes exactly
+                at the end of the required scroll area.
+              */
+
               onUpdate: (self) => {
-                /*
-                  Keep animation synchronized.
-                */
-
-                if (!scrollingElement) {
-                  return;
-                }
-
                 const progress =
                   self.progress;
 
-                const currentY =
+                const y =
                   -moveDistance * progress;
 
                 gsap.set(
                   scrollingElement,
                   {
-                    y: currentY,
+                    y,
                   }
                 );
               },
@@ -493,56 +495,57 @@ const NewArrival = () => {
           }
         );
 
-        trigger = animation.scrollTrigger;
-
         ScrollTrigger.refresh();
       };
 
       /*
-        Images load hone ke baad dimensions correct
-        milengi.
+        Wait until browser has calculated image dimensions.
+      */
+
+      const firstTimer = setTimeout(() => {
+        createAnimation();
+      }, 100);
+
+      const secondTimer = setTimeout(() => {
+        createAnimation();
+      }, 600);
+
+      const thirdTimer = setTimeout(() => {
+        createAnimation();
+      }, 1200);
+
+      /*
+        Images can change layout after loading.
       */
 
       const images =
         scrollingElement.querySelectorAll("img");
 
-      let loadedImages = 0;
-
       const handleImageLoad = () => {
-        loadedImages += 1;
-
-        if (
-          loadedImages >= images.length
-        ) {
-          setupAnimation();
-        }
+        createAnimation();
+        ScrollTrigger.refresh();
       };
 
       images.forEach((image) => {
-        if (image.complete) {
-          handleImageLoad();
-        } else {
-          image.addEventListener(
-            "load",
-            handleImageLoad
-          );
-        }
+        image.addEventListener(
+          "load",
+          handleImageLoad
+        );
       });
-
-      /*
-        Fallback for cached / broken dimensions.
-      */
-
-      const setupTimer = setTimeout(() => {
-        setupAnimation();
-      }, 700);
 
       /*
         Recalculate on resize.
       */
 
+      let resizeTimer = null;
+
       const handleResize = () => {
-        setupAnimation();
+        clearTimeout(resizeTimer);
+
+        resizeTimer = setTimeout(() => {
+          createAnimation();
+          ScrollTrigger.refresh();
+        }, 150);
       };
 
       window.addEventListener(
@@ -551,7 +554,10 @@ const NewArrival = () => {
       );
 
       return () => {
-        clearTimeout(setupTimer);
+        clearTimeout(firstTimer);
+        clearTimeout(secondTimer);
+        clearTimeout(thirdTimer);
+        clearTimeout(resizeTimer);
 
         window.removeEventListener(
           "resize",
@@ -567,15 +573,16 @@ const NewArrival = () => {
 
         if (animation) {
           animation.kill();
-        }
-
-        if (trigger) {
-          trigger.kill();
+          animation = null;
         }
 
         /*
-          Restore section height.
+          Reset styles on unmount.
         */
+
+        gsap.set(scrollingElement, {
+          clearProps: "transform",
+        });
 
         section.style.height = "";
       };
@@ -587,23 +594,21 @@ const NewArrival = () => {
 
     mm.add("(max-width: 64em)", () => {
       /*
-        Completely disable desktop animation.
-
-        Mobile uses normal document scrolling.
+        No desktop animation on mobile/tablet.
       */
+
+      section.style.height = "auto";
 
       gsap.set(scrollingElement, {
         clearProps: "transform",
       });
 
-      section.style.height = "auto";
-
       return () => {
+        section.style.height = "auto";
+
         gsap.set(scrollingElement, {
           clearProps: "transform",
         });
-
-        section.style.height = "";
       };
     });
 
