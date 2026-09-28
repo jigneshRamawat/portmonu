@@ -163,7 +163,7 @@ const Footer = () => {
             </a>
           </li>
           <li>
-            <a href="https://www.behance.net/monaaswalhttps://www.behance.net/monaaswal" target={"_blank"} rel="noreferrer">
+            <a href="https://www.behance.net/monaaswal" target={"_blank"} rel="noreferrer">
               Behance
             </a>
           </li>

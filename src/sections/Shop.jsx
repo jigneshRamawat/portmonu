@@ -250,7 +250,7 @@ const Right = styled.div`
   }
 
   @media (max-width: 30em) {
-    padding: 0.75rem 1rem 2rem;
+    padding: 0.75rem 1rem 1.5rem;
   }
 `;
 
@@ -321,32 +321,6 @@ const Item = styled(motion.div)`
     box-sizing: border-box;
 
     border: 1px solid white;
-
-    /*
-      NORMAL STATE
-      Black & White
-    */
-
-    filter: grayscale(100%);
-
-    /*
-      Smooth color transition
-    */
-
-    transition:
-      filter 0.6s ease,
-      transform 0.6s ease;
-  }
-
-  /*
-    HOVER
-    Original image color
-  */
-
-  &:hover img {
-    filter: grayscale(0%);
-
-    transform: scale(1.02);
   }
 
   h1 {
@@ -373,10 +347,6 @@ const Item = styled(motion.div)`
     }
   }
 
-  /* =====================================================
-     TABLET
-  ===================================================== */
-
   @media (max-width: 64em) {
     width: 18rem;
 
@@ -390,10 +360,6 @@ const Item = styled(motion.div)`
       height: 24rem;
     }
   }
-
-  /* =====================================================
-     MOBILE
-  ===================================================== */
 
   @media (max-width: 48em) {
     width: 15rem;
@@ -428,19 +394,6 @@ const Item = styled(motion.div)`
       padding-top: 0.8rem;
     }
   }
-
-  /*
-    Touch devices don't have reliable hover.
-    Keep images black & white.
-  */
-
-  @media (hover: none) {
-    &:hover img {
-      filter: grayscale(100%);
-
-      transform: none;
-    }
-  }
 `;
 
 /* =========================================================
@@ -449,13 +402,21 @@ const Item = styled(motion.div)`
 
 const Product = ({ img, title = "" }) => {
   return (
-    /*
-      IMPORTANT:
-      No initial / whileInView grayscale here.
-      Image CSS handles grayscale + hover.
-    */
-
-    <Item>
+    <Item
+      initial={{
+        filter: "grayscale(100%)",
+      }}
+       whileHover={{
+        filter: "grayscale(0%)",
+      }}
+      transition={{
+        duration: 0.5,
+      }}
+      viewport={{
+        once: false,
+        amount: 0.2,
+      }}
+    >
       <img
         src={img}
         alt={title}
@@ -496,9 +457,9 @@ const Shop = () => {
     mm.add("(min-width: 1025px)", () => {
       let scrollTween = null;
 
-      /* ---------------------------------------------------
-         GET HORIZONTAL DISTANCE
-      --------------------------------------------------- */
+      /*
+        Calculate exact horizontal distance.
+      */
 
       const getDistance = () => {
         if (!right || !track) {
@@ -511,53 +472,55 @@ const Shop = () => {
         );
       };
 
-      /* ---------------------------------------------------
-         WAIT FOR ALL IMAGES
-      --------------------------------------------------- */
+      /*
+        Wait for all images.
+        This prevents the width from changing while
+        ScrollTrigger is already running.
+      */
 
       const images = Array.from(
         track.querySelectorAll("img")
       );
 
       const waitForImages = () => {
-        return Promise.all(
-          images.map((image) => {
-            if (image.complete) {
-              return Promise.resolve();
-            }
+        const promises = images.map((image) => {
+          if (image.complete) {
+            return Promise.resolve();
+          }
 
-            return new Promise((resolve) => {
-              const done = () => {
-                image.removeEventListener(
-                  "load",
-                  done
-                );
-
-                image.removeEventListener(
-                  "error",
-                  done
-                );
-
-                resolve();
-              };
-
-              image.addEventListener(
+          return new Promise((resolve) => {
+            const done = () => {
+              image.removeEventListener(
                 "load",
                 done
               );
 
-              image.addEventListener(
+              image.removeEventListener(
                 "error",
                 done
               );
-            });
-          })
-        );
+
+              resolve();
+            };
+
+            image.addEventListener(
+              "load",
+              done
+            );
+
+            image.addEventListener(
+              "error",
+              done
+            );
+          });
+        });
+
+        return Promise.all(promises);
       };
 
-      /* ---------------------------------------------------
-         CREATE GSAP SCROLL
-      --------------------------------------------------- */
+      /*
+        Create animation only once.
+      */
 
       const createScroll = () => {
         const distance = getDistance();
@@ -567,7 +530,7 @@ const Shop = () => {
         }
 
         /*
-          Start at first image.
+          Reset track only once before creating tween.
         */
 
         gsap.set(track, {
@@ -575,8 +538,7 @@ const Shop = () => {
         });
 
         /*
-          Vertical page scroll controls horizontal
-          track movement.
+          GSAP horizontal animation.
         */
 
         scrollTween = gsap.to(track, {
@@ -589,24 +551,30 @@ const Shop = () => {
 
             start: "top top",
 
-            end: () =>
-              `+=${getDistance()}`,
+            /*
+              The vertical scroll duration is exactly
+              the horizontal distance.
+            */
+
+            end: () => `+=${getDistance()}`,
 
             /*
-              Existing project scroll container.
+              Your project is using .App as the scroll
+              container.
             */
 
             scroller: ".App",
 
             /*
-              Smooth movement.
+              Smooth interpolation.
+              Increase to 1.5 for slower/smoother movement.
             */
 
-            scrub: 1.5,
+            scrub: 1.2,
 
             /*
-              Keep Shop fixed while horizontal
-              products move.
+              Keep Shop on screen while horizontal
+              animation is running.
             */
 
             pin: true,
@@ -628,14 +596,18 @@ const Shop = () => {
 
       let cancelled = false;
 
-      /* ---------------------------------------------------
-         CREATE ONLY AFTER IMAGES ARE READY
-      --------------------------------------------------- */
+      /*
+        Wait until images are ready.
+      */
 
       waitForImages().then(() => {
         if (cancelled) {
           return;
         }
+
+        /*
+          One frame after images/layout are ready.
+        */
 
         requestAnimationFrame(() => {
           if (cancelled) {
@@ -646,9 +618,10 @@ const Shop = () => {
         });
       });
 
-      /* ---------------------------------------------------
-         RESIZE
-      --------------------------------------------------- */
+      /*
+        Resize should refresh the existing ScrollTrigger,
+        NOT recreate the animation.
+      */
 
       let resizeTimer = null;
 
@@ -665,9 +638,9 @@ const Shop = () => {
         handleResize
       );
 
-      /* ---------------------------------------------------
-         CLEANUP
-      --------------------------------------------------- */
+      /*
+        Cleanup.
+      */
 
       return () => {
         cancelled = true;
@@ -699,7 +672,9 @@ const Shop = () => {
 
     mm.add("(max-width: 1024px)", () => {
       /*
-        Native horizontal swipe on mobile/tablet.
+        No GSAP horizontal animation on mobile/tablet.
+
+        Native touch scrolling.
       */
 
       gsap.set(track, {
@@ -758,7 +733,7 @@ const Shop = () => {
       </Left>
 
       {/* =================================================
-          RIGHT PRODUCTS
+          RIGHT / PRODUCTS
       ================================================= */}
 
       <Right ref={rightRef}>
